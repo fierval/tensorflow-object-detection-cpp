@@ -4,7 +4,6 @@ Inspired by [issue](https://github.com/tensorflow/models/issues/1741#issuecommen
 
 Requirements (for use without Bazel):
 * `TensorFlow` .so builds ([more](https://github.com/tensorflow/tensorflow/issues/2412#issuecomment-300628873), requires Bazel to build)
-* `Eigen3` headers ([more](http://eigen.tuxfamily.org/index.php?title=Main_Page))
 * `OpenCV` ([more](https://github.com/opencv/opencv))
 
 Usage:
