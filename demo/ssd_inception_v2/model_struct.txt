@@ -1,0 +1,7 @@
+Found 1 possible inputs: (name=image_tensor, type=uint8(4), shape=[?,?,?,3]) 
+No variables spotted.
+Found 4 possible outputs: (name=detection_boxes, op=Identity) (name=detection_scores, op=Identity) (name=detection_classes, op=Identity) (name=num_detections, op=Identity) 
+Found 13342711 (13.34M) const parameters, 0 (0) variable parameters, and 175 control_edges
+Op types used: 1234 Const, 433 Identity, 109 Reshape, 89 Conv2D, 80 Slice, 77 Relu6, 77 FusedBatchNorm, 67 Mul, 61 ConcatV2, 48 StridedSlice, 48 Fill, 42 Pack, 39 ExpandDims, 37 Shape, 37 Add, 37 Tile, 34 Cast, 33 RealDiv, 31 Sub, 30 Range, 28 Enter, 19 GatherV2, 12 BiasAdd, 11 TensorArrayV3, 10 Merge, 10 NextIteration, 10 Switch, 8 Select, 8 Minimum, 7 AvgPool, 6 TensorArraySizeV3, 6 Less, 6 Greater, 6 TensorArrayWriteV3, 6 TensorArrayGatherV3, 6 Exit, 6 Sqrt, 5 TensorArrayScatterV3, 5 TensorArrayReadV3, 5 MaxPool, 5 Unpack, 4 Maximum, 4 Squeeze, 4 ZerosLike, 3 Pad, 3 Transpose, 3 Split, 3 Assert, 3 Equal, 3 Rank, 2 Size, 2 TopKV2, 2 Exp, 2 LogicalAnd, 2 LoopCond, 2 NonMaxSuppressionV3, 1 GreaterEqual, 1 Placeholder, 1 Sum, 1 ResizeBilinear, 1 DepthwiseConv2dNative, 1 Sigmoid, 1 Where, 1 All
+To use with tensorflow/tools/benchmark:benchmark_model try these arguments:
+bazel run tensorflow/tools/benchmark:benchmark_model -- --graph=/home/borisk/fpga/fine_tuned_model/31136/frozen_inference_graph.pb --show_flops --input_layer=image_tensor --input_layer_type=uint8 --input_layer_shape=-1,-1,-1,3 --output_layer=detection_boxes,detection_scores,detection_classes,num_detections

@@ -110,26 +110,10 @@ Status readTensorFromMat(const Mat &mat, Tensor &outTensor) {
     using namespace ::tensorflow::ops;
 
     // Trick from https://github.com/tensorflow/tensorflow/issues/8033
-    float *p = outTensor.flat<float>().data();
-    Mat fakeMat(mat.rows, mat.cols, CV_32FC3, p);
-    mat.convertTo(fakeMat, CV_32FC3);
+    uint8_t *p = outTensor.flat<uint8_t>().data();
+    Mat fakeMat(mat.rows, mat.cols, CV_8UC3, p);
+    mat.copyTo(fakeMat);
 
-    auto input_tensor = Placeholder(root.WithOpName("input"), tensorflow::DT_FLOAT);
-    vector<pair<string, tensorflow::Tensor>> inputs = {{"input", outTensor}};
-    auto uint8Caster = Cast(root.WithOpName("uint8_Cast"), outTensor, tensorflow::DT_UINT8);
-
-    // This runs the GraphDef network definition that we've just constructed, and
-    // returns the results in the output outTensor.
-    tensorflow::GraphDef graph;
-    TF_RETURN_IF_ERROR(root.ToGraphDef(&graph));
-
-    vector<Tensor> outTensors;
-    unique_ptr<tensorflow::Session> session(tensorflow::NewSession(tensorflow::SessionOptions()));
-
-    TF_RETURN_IF_ERROR(session->Create(graph));
-    TF_RETURN_IF_ERROR(session->Run({inputs}, {"uint8_Cast"}, {}, &outTensors));
-
-    outTensor = outTensors.at(0);
     return Status::OK();
 }
 

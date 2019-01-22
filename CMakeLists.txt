@@ -1,28 +1,43 @@
-cmake_minimum_required(VERSION 3.7)
-project(tf_detector_example)
+cmake_minimum_required(VERSION 3.8)
+project(tf_detector_example LANGUAGES CXX CUDA)
+
+cmake_policy(SET CMP0074 OLD)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp utils.cpp utils.h)
+# CUDA for cudacodec ops
+find_package(CUDA 9.2 REQUIRED)
+
+set(SOURCE_FILES 
+    main.cpp
+    utils.cpp 
+    utils.h 
+    )
+
+# Tensorflow directories and libraries
+set(TENSORFLOW_LIBS libtensorflow_cc.so libtensorflow_framework.so)
+set(MYHOME $ENV{HOME})
+
+message("-- Home set to: " ${MYHOME})
+link_directories("/usr/local/tensorflow/lib")
+
 add_executable(tf_detector_example ${SOURCE_FILES})
+set_target_properties(tf_detector_example PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 # OpenCV libs
 find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-target_link_libraries(tf_detector_example ${OpenCV_LIBS})
 
+include_directories(${OpenCV_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
 
 # ==================== PATHS TO SPECIFY! ==================== #
 
-# Eigen lib headers
-include_directories("/usr/local/include/eigen3")
-
 # TensorFlow headers
-include_directories("/usr/local/include/tf/")
-include_directories("/usr/local/include/tf/bazel-genfiles/")
-include_directories("/usr/local/include/tf/tensorflow/")
-include_directories("/usr/local/include/tf/third-party/")
+include_directories("/usr/local/tensorflow/include/tensorflow/")
+include_directories("/usr/local/tensorflow/include/third-party/")
+include_directories("/usr/local/tensorflow/include/")
+include_directories("${MYHOME}/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/include/")
 
-# Link TensorFlow libs
-target_link_libraries(tf_detector_example "/usr/local/lib/libtensorflow_cc.so")
-target_link_libraries(tf_detector_example "/usr/local/lib/libtensorflow_framework.so")
+target_link_libraries(tf_detector_example
+    cuda
+    ${OpenCV_LIBS} 
+    ${TENSORFLOW_LIBS})

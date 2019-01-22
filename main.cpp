@@ -34,13 +34,14 @@ using tensorflow::int32;
 
 using namespace std;
 using namespace cv;
+using namespace std::chrono;
 
 int main(int argc, char* argv[]) {
 
     // Set dirs variables
     string ROOTDIR = "../";
-    string LABELS = "demo/ssd_mobilenet_v1_egohands/labels_map.pbtxt";
-    string GRAPH = "demo/ssd_mobilenet_v1_egohands/frozen_inference_graph.pb";
+    string LABELS = "demo/ssd_inception_v2/classes.pbtxt";
+    string GRAPH = "demo/ssd_inception_v2/frozen_inference_graph.pb";
 
     // Set input & output nodes names
     string inputLayer = "image_tensor:0";
@@ -74,14 +75,15 @@ int main(int argc, char* argv[]) {
     double thresholdIOU = 0.8;
 
     // FPS count
-    int nFrames = 25;
+    int nFrames = 30;
     int iFrame = 0;
     double fps = 0.;
-    time_t start, end;
-    time(&start);
+
+    high_resolution_clock::time_point start = high_resolution_clock::now();
+    high_resolution_clock::time_point end, infer_end;
 
     // Start streaming frames from camera
-    VideoCapture cap(1);
+    VideoCapture cap("/home/boris/Videos/ride_2.mp4");
 
     tensorflow::TensorShape shape = tensorflow::TensorShape();
     shape.AddDim(1);
@@ -89,20 +91,20 @@ int main(int argc, char* argv[]) {
     shape.AddDim((int64)cap.get(CAP_PROP_FRAME_WIDTH));
     shape.AddDim(3);
 
+    tensor = Tensor(tensorflow::DT_UINT8, shape);
+
     while (cap.isOpened()) {
         cap >> frame;
         cvtColor(frame, frame, COLOR_BGR2RGB);
-        cout << "Frame # " << iFrame << endl;
 
-        if (nFrames % (iFrame + 1) == 0) {
-            time(&end);
-            fps = 1. * nFrames / difftime(end, start);
-            time(&start);
+        if (++iFrame % nFrames == 0) {
+            end = high_resolution_clock::now();
+            auto duration = duration_cast<milliseconds>(end - start);
+            fps = 1. * nFrames / (double)duration.count() * 1000.;
+            start = high_resolution_clock::now();
         }
-        iFrame++;
 
         // Convert mat to tensor
-        tensor = Tensor(tensorflow::DT_FLOAT, shape);
         Status readTensorStatus = readTensorFromMat(frame, tensor);
         if (!readTensorStatus.ok()) {
             LOG(ERROR) << "Mat->Tensor conversion failed: " << readTensorStatus;
@@ -124,11 +126,6 @@ int main(int argc, char* argv[]) {
         tensorflow::TTypes<float, 3>::Tensor boxes = outputs[0].flat_outer_dims<float,3>();
 
         vector<size_t> goodIdxs = filterBoxes(scores, boxes, thresholdIOU, thresholdScore);
-        for (size_t i = 0; i < goodIdxs.size(); i++)
-            LOG(INFO) << "score:" << scores(goodIdxs.at(i)) << ",class:" << labelsMap[classes(goodIdxs.at(i))]
-                      << " (" << classes(goodIdxs.at(i)) << "), box:" << "," << boxes(0, goodIdxs.at(i), 0) << ","
-                      << boxes(0, goodIdxs.at(i), 1) << "," << boxes(0, goodIdxs.at(i), 2) << ","
-                      << boxes(0, goodIdxs.at(i), 3);
 
         // Draw bboxes and captions
         cvtColor(frame, frame, COLOR_BGR2RGB);
