@@ -58,9 +58,21 @@ Status readLabelsMapFile(const string &fileName, map<int, string> &labelsMap) {
     smatch matcherId;
     smatch matcherName;
     const regex reEntry("item \\{([\\S\\s]*?)\\}");
-    const regex reId("[0-9]+");
-    const regex reName("\'.+\'");
+    const regex reId("id: [0-9]+");
+    const regex reDisplayName("display_name: (\"|\').+(\"|\')");
+    const regex reName("name: (\"|\').+(\"|\')");
+
     string entry;
+
+    const string namePrefix = "name: \"";
+    const string display_name = "display_name: \"";
+
+    const size_t idOffset = string("id: ").length();
+    size_t nameOffset = display_name.length();
+
+    // we first try to parse "display_name"
+    // and fall back if it does not exist
+    bool isParsingName = false;
 
     auto stringBegin = sregex_iterator(fileString.begin(), fileString.end(), reEntry);
     auto stringEnd = sregex_iterator();
@@ -72,12 +84,27 @@ Status readLabelsMapFile(const string &fileName, map<int, string> &labelsMap) {
         entry = matcherEntry.str();
         regex_search(entry, matcherId, reId);
         if (!matcherId.empty())
-            id = stoi(matcherId[0].str());
+            id = stoi(matcherId[0].str().substr(idOffset, matcherId[0].str().length() - idOffset));
         else
             continue;
-        regex_search(entry, matcherName, reName);
+
+        if(!isParsingName)
+        {
+            regex_search(entry, matcherName, reDisplayName);
+            if(matcherName.empty())
+            {
+                isParsingName = true;
+                nameOffset = namePrefix.length();
+            }
+        }
+
+        if(isParsingName)
+        {
+            regex_search(entry, matcherName, reName);
+        }
+        
         if (!matcherName.empty())
-            name = matcherName[0].str().substr(1, matcherName[0].str().length() - 2);
+            name = matcherName[0].str().substr(nameOffset, matcherName[0].str().length() - nameOffset - 1);
         else
             continue;
         labelsMap.insert(pair<int, string>(id, name));
