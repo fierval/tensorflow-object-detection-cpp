@@ -3,11 +3,11 @@
 
 #endif //TF_DETECTOR_EXAMPLE_UTILS_H
 
-#include <vector>
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/public/session.h"
-#include <opencv2/core/mat.hpp>
+#include "tensorflow/core/lib/io/path.h"
 
+#include <cv.hpp>
 
 using tensorflow::Tensor;
 using tensorflow::Status;

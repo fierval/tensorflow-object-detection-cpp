@@ -7,33 +7,11 @@
 #include <iostream>
 #include <regex>
 
-#include "tensorflow/cc/ops/const_op.h"
-#include "tensorflow/cc/ops/image_ops.h"
-#include "tensorflow/cc/ops/standard_ops.h"
-#include "tensorflow/core/framework/graph.pb.h"
-#include "tensorflow/core/framework/tensor.h"
-#include "tensorflow/core/graph/default_device.h"
-#include "tensorflow/core/graph/graph_def_builder.h"
-#include "tensorflow/core/lib/core/errors.h"
-#include "tensorflow/core/lib/core/stringpiece.h"
-#include "tensorflow/core/lib/core/threadpool.h"
-#include "tensorflow/core/lib/io/path.h"
-#include "tensorflow/core/lib/strings/stringprintf.h"
-#include "tensorflow/core/platform/env.h"
-#include "tensorflow/core/platform/init_main.h"
-#include "tensorflow/core/platform/logging.h"
-#include "tensorflow/core/platform/types.h"
-#include "tensorflow/core/public/session.h"
-#include "tensorflow/core/util/command_line_flags.h"
-
 #include <cv.hpp>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 
 using namespace std;
 using namespace cv;
 
-using tensorflow::Flag;
 using tensorflow::Tensor;
 using tensorflow::Status;
 using tensorflow::string;
@@ -50,7 +28,12 @@ Status loadGraph(const string &graph_file_name,
         return tensorflow::errors::NotFound("Failed to load compute graph at '",
                                             graph_file_name, "'");
     }
-    session->reset(tensorflow::NewSession(tensorflow::SessionOptions()));
+
+    tensorflow::SessionOptions opts;
+    opts.config.mutable_gpu_options()->set_allow_growth(true);
+
+    session->reset(tensorflow::NewSession(opts));
+    
     Status session_create_status = (*session)->Create(graph_def);
     if (!session_create_status.ok()) {
         return session_create_status;
@@ -105,9 +88,6 @@ Status readLabelsMapFile(const string &fileName, map<int, string> &labelsMap) {
 /** Convert Mat image into tensor of shape (1, height, width, d) where last three dims are equal to the original dims.
  */
 Status readTensorFromMat(const Mat &mat, Tensor &outTensor) {
-
-    auto root = tensorflow::Scope::NewRootScope();
-    using namespace ::tensorflow::ops;
 
     // Trick from https://github.com/tensorflow/tensorflow/issues/8033
     uint8_t *p = outTensor.flat<uint8_t>().data();
