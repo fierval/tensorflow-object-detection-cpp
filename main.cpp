@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
     int nFrames = 30;
     int iFrame = 0;
     double fps = 0.;
+    double duration = 0.;
 
     high_resolution_clock::time_point start = high_resolution_clock::now();
     high_resolution_clock::time_point end, infer_end;
@@ -73,14 +74,14 @@ int main(int argc, char* argv[]) {
     tensor = Tensor(tensorflow::DT_UINT8, shape);
 
     while (cap.isOpened()) {
+        start = high_resolution_clock::now();
+
         cap >> frame;
         cvtColor(frame, frame, COLOR_BGR2RGB);
 
         if (++iFrame % nFrames == 0) {
-            end = high_resolution_clock::now();
-            auto duration = duration_cast<milliseconds>(end - start);
-            fps = 1. * nFrames / (double)duration.count() * 1000.;
-            start = high_resolution_clock::now();
+            fps = 1. * nFrames / duration * 1000.;
+            duration = 0.;
         }
 
         // Convert mat to tensor
@@ -97,6 +98,8 @@ int main(int argc, char* argv[]) {
             LOG(ERROR) << "Running model failed: " << runStatus;
             return -1;
         }
+        end = high_resolution_clock::now();
+        duration += (double) duration_cast<milliseconds>(end - start).count();
 
         // Extract results from the outputs vector
         tensorflow::TTypes<float>::Flat scores = outputs[1].flat<float>();
