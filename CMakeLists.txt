@@ -6,7 +6,7 @@ cmake_policy(SET CMP0074 OLD)
 set(CMAKE_CXX_STANDARD 11)
 
 # CUDA for cudacodec ops
-find_package(CUDA 9.2 REQUIRED)
+find_package(CUDA 9.0 REQUIRED)
 
 set(SOURCE_FILES 
     main.cpp
@@ -35,6 +35,11 @@ include_directories(${OpenCV_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
 include_directories("/usr/local/tensorflow/include/tensorflow/")
 include_directories("/usr/local/tensorflow/include/third-party/")
 include_directories("/usr/local/tensorflow/include/")
+
+# IMPORTANT: Protobuf includes. Depends on the anaconda path
+# This is Azure DLVM (not sure if DSVM is the same)
+include_directories("/data/anaconda/envs/py36/lib/python3.6/site-packages/tensorflow/include/")
+# This is a standard install of Anaconda with p36 environment
 include_directories("${MYHOME}/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/include/")
 
 target_link_libraries(tf_detector_example
