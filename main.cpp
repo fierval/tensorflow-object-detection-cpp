@@ -115,7 +115,13 @@ int main(int argc, char* argv[]) {
 
         putText(frame, to_string(fps).substr(0, 5), Point(0, frame.rows), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 255, 255));
         imshow("stream", frame);
-        waitKey(5);
+        waitKey(1);
+
+        if (iFrame % 100 == 0)
+        {
+            LOG(INFO) << "Speed: " << to_string(fps).substr(0, 5);
+        }
+
     }
     destroyAllWindows();
 
