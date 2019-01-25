@@ -113,7 +113,8 @@ int main(int argc, char* argv[]) {
         cvtColor(frame, frame, COLOR_BGR2RGB);
         drawBoundingBoxesOnImage(frame, scores, classes, boxes, labelsMap, goodIdxs);
 
-        putText(frame, to_string(fps).substr(0, 5), Point(0, frame.rows), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 255, 255));
+        putText(frame, "TensorFlow: CPU feed", Point(0, frame.rows - 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 0, 255), 2);
+        putText(frame, to_string(fps).substr(0, 5), Point(0, frame.rows - 5), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 255, 255), 2);
         imshow("stream", frame);
         waitKey(1);
 
