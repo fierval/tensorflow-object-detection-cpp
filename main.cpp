@@ -21,7 +21,8 @@ int main(int argc, char* argv[]) {
     string ROOTDIR = "../";
     string LABELS = "demo/ssd_inception_v2/classes.pbtxt";
     string GRAPH = "demo/ssd_inception_v2/frozen_inference_graph.pb";
-
+    string VIDEO_FILE = "demo/ssd_inception_v2/ride_2.mp4";
+    
     // Set input & output nodes names
     string inputLayer = "image_tensor:0";
     vector<string> outputLayer = {"detection_boxes:0", "detection_scores:0", "detection_classes:0", "num_detections:0"};
@@ -29,6 +30,7 @@ int main(int argc, char* argv[]) {
     // Load and initialize the model from .pb file
     std::unique_ptr<tensorflow::Session> session;
     string graphPath = tensorflow::io::JoinPath(ROOTDIR, GRAPH);
+    
     LOG(INFO) << "graphPath:" << graphPath;
     Status loadGraphStatus = loadGraph(graphPath, &session);
     if (!loadGraphStatus.ok()) {
@@ -62,8 +64,9 @@ int main(int argc, char* argv[]) {
     high_resolution_clock::time_point start = high_resolution_clock::now();
     high_resolution_clock::time_point end, infer_end;
 
+    string videoPath = tensorflow::io::JoinPath(ROOTDIR, VIDEO_FILE);
     // Start streaming frames from camera
-    VideoCapture cap("/home/boris/Videos/ride_2.mp4");
+    VideoCapture cap(videoPath);
 
     tensorflow::TensorShape shape = tensorflow::TensorShape();
     shape.AddDim(1);
