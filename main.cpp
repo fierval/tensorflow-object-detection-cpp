@@ -72,11 +72,18 @@ int main(int argc, char* argv[]) {
     shape.AddDim(3);
 
     tensor = Tensor(tensorflow::DT_UINT8, shape);
+    bool ret = false;
 
     while (cap.isOpened()) {
         start = high_resolution_clock::now();
+        
+        ret = cap.read(frame);
+        if(!ret)
+        {
+            cap.release();
+            continue;
+        }
 
-        cap >> frame;
         cvtColor(frame, frame, COLOR_BGR2RGB);
 
         if (++iFrame % nFrames == 0) {
@@ -108,7 +115,7 @@ int main(int argc, char* argv[]) {
         tensorflow::TTypes<float, 3>::Tensor boxes = outputs[0].flat_outer_dims<float,3>();
 
         vector<size_t> goodIdxs = filterBoxes(scores, boxes, thresholdIOU, thresholdScore);
-
+        
         // Draw bboxes and captions
         cvtColor(frame, frame, COLOR_BGR2RGB);
         drawBoundingBoxesOnImage(frame, scores, classes, boxes, labelsMap, goodIdxs);
@@ -117,6 +124,7 @@ int main(int argc, char* argv[]) {
         putText(frame, to_string(fps).substr(0, 5), Point(0, frame.rows - 5), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 255, 255), 2);
         imshow("stream", frame);
         waitKey(1);
+        
 
         if (iFrame % 100 == 0)
         {

@@ -2,7 +2,6 @@
 #define TF_DETECTOR_EXAMPLE_UTILS_H
 
 #endif //TF_DETECTOR_EXAMPLE_UTILS_H
-
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/public/session.h"
 #include "tensorflow/core/lib/io/path.h"
